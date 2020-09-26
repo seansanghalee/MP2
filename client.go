@@ -10,6 +10,7 @@ import (
 	"strings"
 )
 
+//login() connects to the server with chosen username
 func login() (string, string, string) {
 	var ip, port, username string
 	reader := bufio.NewReader(os.Stdin)
@@ -27,6 +28,7 @@ func login() (string, string, string) {
 	return ip, port, username
 }
 
+//sendUsername() sends chosen username to the server
 func sendUsername(username string, conn net.Conn) {
 	enc := gob.NewEncoder(conn)
 	enc.Encode(username)
@@ -34,6 +36,7 @@ func sendUsername(username string, conn net.Conn) {
 	return
 }
 
+//receiveMessage() waits for messages from server and displays them or EXITS
 func receiveMessage(conn net.Conn) {
 	for {
 		var msg message.Message
@@ -41,7 +44,7 @@ func receiveMessage(conn net.Conn) {
 		dec.Decode(&msg)
 
 		// is the message an exit signal from the server
-		if msg.To == "EXIT" {
+		if strings.ToUpper(msg.To) == "EXIT" {
 			message.Display(msg)
 			os.Exit(0)
 		} else {
@@ -52,6 +55,7 @@ func receiveMessage(conn net.Conn) {
 	}
 }
 
+//sendMessage() takes user input and sends message to server
 func sendMessage(username string, conn net.Conn) {
 	for {
 		var to, content string
@@ -60,7 +64,7 @@ func sendMessage(username string, conn net.Conn) {
 		fmt.Print("To: ")
 		to, _ = reader.ReadString('\n')
 		to = strings.TrimSpace(to)
-		if to == "EXIT" {
+		if strings.ToUpper(to) == "EXIT" {
 			msg := message.Construct(to, username, username+" is exiting the server...")
 			enc := gob.NewEncoder(conn)
 			enc.Encode(msg)
@@ -86,6 +90,7 @@ func main() {
 		fmt.Println(err)
 		return
 	}
+
 	sendUsername(username, c)
 
 	go receiveMessage(c)

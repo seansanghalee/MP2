@@ -12,13 +12,14 @@ import (
 	"time"
 )
 
+// showClients prints out username of clients currently connected to the server
 func showClients(clients map[string]net.Conn) {
 	rand.Seed(time.Now().Unix())
 	status := []string{
 		"is ready to party!", "is chatting away!", "is getting down and dirty!",
 		"is talking my ear off!", "needs to be kicked out!", "has no off button!",
-		" wont shut up!!!!", "is my least favorite person!", "... who let that guy in!",
-		"...everyone be quiet he might just leave.",
+		"wont shut up!!!!", "is my least favorite person!", "... who let that guy in!",
+		"...everyone be quiet he might just leave.", "is my second least favorite person",
 	}
 
 	fmt.Println("\nCurrent Participants:")
@@ -29,6 +30,7 @@ func showClients(clients map[string]net.Conn) {
 	return
 }
 
+// addClient() adds the new client to the clients map
 func addClient(clients map[string]net.Conn, username string, conn net.Conn) {
 	clients[username] = conn
 	fmt.Println(username, "joined the chat!")
@@ -37,6 +39,7 @@ func addClient(clients map[string]net.Conn, username string, conn net.Conn) {
 	return
 }
 
+// getUsername() gets the username sent from the client
 func getUsername(conn net.Conn) string {
 	dec := gob.NewDecoder(conn)
 	var username string
@@ -45,6 +48,7 @@ func getUsername(conn net.Conn) string {
 	return username
 }
 
+// serve() handles interclient messaging and client EXIT commands
 func serve(clients map[string]net.Conn, conn net.Conn) {
 	for {
 		var msg message.Message
@@ -53,7 +57,7 @@ func serve(clients map[string]net.Conn, conn net.Conn) {
 		dec.Decode(&msg)
 
 		//if the message was exit command, delete that user from map
-		if msg.To == "EXIT" {
+		if strings.ToUpper(msg.To) == "EXIT" {
 			delete(clients, msg.From)
 			conn.Close()
 			message.Display(msg)
@@ -75,10 +79,11 @@ func serve(clients map[string]net.Conn, conn net.Conn) {
 
 }
 
+//waitForExit() waits for server EXIT command, informs all clients, then quits program
 func waitForExit(clients map[string]net.Conn) {
 	reader := bufio.NewReader(os.Stdin)
 	exit, _ := reader.ReadString('\n')
-	if exit == "EXIT\n" {
+	if strings.ToUpper(exit) == "EXIT\n" {
 		exitMsg := message.Message{"EXIT", "SERVER", "Server Exiting"}
 		for _, element := range clients {
 			enc := gob.NewEncoder(element)
