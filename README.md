@@ -35,7 +35,7 @@ The program will then prompt user to provide the IP address of the server, the p
 ```
 Enter the host address:
 Enter the port number:
-Enter your usernmae:
+Enter your username:
 ```
 
 Provide those three fields, and the client is ready to go.
@@ -61,7 +61,7 @@ If the client attempts to send a message to another client that does not exist, 
 To: billybob
 Enter your message: hello
 
-SERVER: No such user billybob
+SERVER: No Such User [billybob]
 ```
 If the message has been sent successfully, it will appear on the receiving user's command line as,
 
@@ -76,7 +76,7 @@ A client can exit the program by typing EXIT into their terminal window. This se
 //client "billybob"
 EXIT
 //server
-billybob is exiting the chat.
+billybob is exiting the server...
 ```
 The server can also exit the program by typing EXIT into their terminal window. This sends a message to all clients informing them that the server is exiting. The server and clients then automatically quit the program.
 ```
