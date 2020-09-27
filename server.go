@@ -9,6 +9,7 @@ import (
 	"net"
 	"os"
 	"strings"
+	"sync"
 	"time"
 )
 
@@ -50,6 +51,7 @@ func getUsername(conn net.Conn) string {
 
 // serve() handles interclient messaging and client EXIT commands
 func serve(clients map[string]net.Conn, conn net.Conn) {
+	var mux = &sync.Mutex{}
 	for {
 		var msg message.Message
 		// receives the message, decodes it
@@ -57,26 +59,31 @@ func serve(clients map[string]net.Conn, conn net.Conn) {
 		dec.Decode(&msg)
 
 		//if the message was exit command, delete that user from map
-		if strings.ToUpper(msg.To) == "EXIT" {
+		if strings.ToUpper(msg.To) == "EXIT" || strings.ToUpper(msg.Content) == "EXIT" {
+			mux.Lock() // lock
 			delete(clients, msg.From)
+			mux.Unlock() // unlock
 			conn.Close()
 			message.Display(msg)
 			return
 		} else if msg.To != "" {
+			mux.Lock() //lock
 			newConn, found := clients[msg.To]
+			mux.Unlock() // unlock
 			if found == true {
 				enc := gob.NewEncoder(newConn)
 				enc.Encode(msg)
 			} else {
-				errorMsg := message.Message{msg.From, "SERVER", "No Such User" + "[" + msg.To + "]"}
+				errorMsg := message.Message{msg.From, "SERVER", "Error, No Such User" + "[" + msg.To + "]"}
+				mux.Lock() // lock
 				enc := gob.NewEncoder(clients[msg.From])
+				mux.Unlock() // unlock
 				enc.Encode(errorMsg)
 			}
 
 		}
 
 	}
-
 }
 
 //waitForExit() waits for server EXIT command, informs all clients, then quits program
@@ -125,5 +132,4 @@ func main() {
 
 		go serve(clients, c)
 	}
-
 }

@@ -74,6 +74,14 @@ func sendMessage(username string, conn net.Conn) {
 		fmt.Print("Enter your message: ")
 		content, _ = reader.ReadString('\n')
 		content = strings.TrimSpace(content)
+		if strings.ToUpper(content) == "EXIT" {
+			to = "EXIT"
+			msg := message.Construct(to, username, username+" is exiting the server...")
+			enc := gob.NewEncoder(conn)
+			enc.Encode(msg)
+			fmt.Println("Exiting...")
+			os.Exit(0)
+		}
 		msg := message.Construct(to, username, content)
 		enc := gob.NewEncoder(conn)
 		enc.Encode(msg)
