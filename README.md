@@ -106,3 +106,5 @@ server.go includes the main function that first starts the tcp server.  It also 
 
 # Notes
 We added lots of additional features to improve user experience, such as personalized messages for each user when listing server participants!
+
+Added mutex lock and unlock to prevent race condition in func serve() in server.go
